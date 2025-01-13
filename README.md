@@ -120,7 +120,3 @@ Feel free to fork this repository and contribute to the plugin! If you encounter
 ### **License**
 
 This plugin is open-source and distributed under the [MIT License](https://opensource.org/licenses/MIT). You are free to use, modify, and distribute it as per the terms of the license.  
-
----
-
-Let me know if you'd like additional details or changes to the documentation! 😊  
