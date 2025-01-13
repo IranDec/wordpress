@@ -1,0 +1,85 @@
+#language-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9); /* کمی تیره‌تر برای پس‌زمینه */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif; /* تنظیم فونت زیبا */
+}
+
+.language-selection {
+    text-align: center;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* اضافه کردن سایه */
+}
+
+.language-selection h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.flag-circle {
+    width: 70px;
+    height: 70px;
+    background-size: cover;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    border: 2px solid #ddd;
+    transition: transform 0.3s ease, border-color 0.3s ease; /* انیمیشن برای پرچم‌ها */
+}
+
+.flag-circle:hover {
+    transform: scale(1.1); /* بزرگ‌تر شدن هنگام هاور */
+    border-color: #333;
+}
+
+.language-item {
+    display: inline-block;
+    margin: 15px;
+    text-align: center;
+    text-decoration: none;
+    color: #444;
+    font-weight: bold;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.language-item:hover {
+    color: #007bff; /* تغییر رنگ متن هنگام هاور */
+}
+
+.remember-choice {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+input[type="checkbox"] {
+    margin-right: 5px;
+    transform: scale(1.2); /* بزرگ‌تر کردن چک‌باکس */
+}
+
+
+.fade-out {
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
