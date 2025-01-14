@@ -6,67 +6,166 @@ Description: A plugin to force users to select a language before viewing the web
  * Author: Mohammad Babaei
  * website: adschi.com
 */
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
-}
+add_action('wp_footer', function () {
+    if (!isset($_COOKIE['selected_language'])) {
+        ?>
+        <div id="language-modal" style="display: flex;">
+            <div class="language-modal-content">
+                <button class="modal-close">&times;</button>
+                <h2>Select Your Language</h2>
+                <div class="language-options">
+                    <button data-lang="en" class="language-button">
+                        <img src="https://flagcdn.com/w80/us.png" alt="English"> English
+                    </button>
+                    <button data-lang="fa" class="language-button">
+                        <img src="https://flagcdn.com/w80/ir.png" alt="فارسی"> فارسی
+                    </button>
+                    <button data-lang="ar" class="language-button">
+                        <img src="https://flagcdn.com/w80/sa.png" alt="العربية"> العربية
+                    </button>
+                </div>
+                <div class="remember-me">
+                    <input type="checkbox" id="remember-choice" checked>
+                    <label for="remember-choice">Remember my choice for 30 days</label>
+                </div>
+            </div>
+        </div>
+        <div id="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+        </div>
+        <style>
+            /* Modal styling */
+            #language-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+            .language-modal-content {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                position: relative;
+            }
+            .modal-close {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+            }
+            .language-options {
+                display: flex;
+                justify-content: center;
+                gap: 15px;
+            }
+            .language-button {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                background: #f0f0f0;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .language-button img {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+            }
+            .language-button:hover {
+                background: #e0e0e0;
+            }
+            .remember-me {
+                margin-top: 20px;
+                font-size: 14px;
+            }
+            /* Loading overlay styling */
+            #loading-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            }
+            .loading-spinner {
+                width: 50px;
+                height: 50px;
+                border: 5px solid #f3f3f3;
+                border-top: 5px solid #3498db;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modal = document.getElementById('language-modal');
+                const closeButton = document.querySelector('.modal-close');
+                const languageButtons = document.querySelectorAll('.language-button');
+                const rememberChoice = document.getElementById('remember-choice');
+                const loadingOverlay = document.getElementById('loading-overlay');
 
-// Enqueue scripts and styles securely
-add_action('wp_enqueue_scripts', 'fls_enqueue_scripts');
-add_action('wp_footer', 'fls_display_language_overlay');
+                // زبان پیش‌فرض سایت
+                const defaultLanguage = document.documentElement.lang || 'en'; // زبان فعلی سایت
 
-function fls_enqueue_scripts() {
-    wp_enqueue_style('fls-style', plugin_dir_url(__FILE__) . 'style.css', [], '1.0.0', 'all');
-    wp_enqueue_script('fls-script', plugin_dir_url(__FILE__) . 'script.js', ['jquery'], '1.0.0', true);
+                // Close modal on clicking the close button
+                closeButton.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                });
 
-    // Securely pass AJAX URL
-    wp_localize_script('fls-script', 'fls_ajax', [
-        'ajax_url' => esc_url(admin_url('admin-ajax.php')),
-        'nonce' => wp_create_nonce('fls_nonce'), // Add a nonce for security
-    ]);
-}
+                // Handle language selection
+                languageButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const lang = button.getAttribute('data-lang');
+                        
+                        if (lang === defaultLanguage) {
+                            // اگر زبان فعلی انتخاب شده باشد، مودال بسته شود
+                            modal.style.display = 'none';
+                            return;
+                        }
 
-function fls_display_language_overlay() {
-    if (isset($_COOKIE['language_selected']) && sanitize_text_field($_COOKIE['language_selected']) === '1') {
-        return; // Skip overlay if cookie exists
+                        if (rememberChoice.checked) {
+                            document.cookie = `selected_language=${lang}; path=/; max-age=${30 * 24 * 60 * 60}`;
+                        }
+
+                        // Show loading overlay before redirect
+                        loadingOverlay.style.display = 'flex';
+
+                        // Simulate a small delay before redirect (optional)
+                        setTimeout(() => {
+                            // Redirect to the selected language page
+                            window.location.href = lang === 'en' ? '/' : `/${lang}`;
+                        }, 500);
+                    });
+                });
+            });
+        </script>
+        <?php
     }
-
-    $languages = apply_filters('wpml_active_languages', null, 'skip_missing=0'); 
-    if (!empty($languages)) {
-        echo '<div id="language-overlay">';
-        echo '<div class="language-selection">';
-        echo '<h2>' . esc_html__('Select Your Language', 'force-language-selection') . '</h2>';
-        foreach ($languages as $lang) {
-            $flag = esc_url($lang['country_flag_url']);
-            $name = esc_html($lang['translated_name']);
-            $url = esc_url($lang['url']);
-            echo "<a href='{$url}' class='language-item'>";
-            echo "<div class='flag-circle' style='background-image: url({$flag});'></div>";
-            echo "<span>{$name}</span>";
-            echo "</a>";
-        }
-        echo '<div class="remember-choice">';
-        echo '<input type="checkbox" id="remember-choice">';
-        echo '<label for="remember-choice">' . esc_html__('Remember my choice for 30 days', 'force-language-selection') . '</label>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-    }
-}
-
-// Secure AJAX handler for setting cookies
-add_action('wp_ajax_set_language_cookie', 'fls_set_language_cookie');
-add_action('wp_ajax_nopriv_set_language_cookie', 'fls_set_language_cookie');
-
-function fls_set_language_cookie() {
-    // Verify nonce
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'fls_nonce')) {
-        wp_send_json_error(['message' => 'Invalid nonce']);
-    }
-
-    if (!isset($_POST['remember']) || $_POST['remember'] !== 'true') {
-        wp_send_json_error(['message' => 'Invalid input']);
-    }
-
-    setcookie('language_selected', '1', time() + 2592000, COOKIEPATH, COOKIE_DOMAIN, is_ssl(), true); // Secure cookie
-    wp_send_json_success(['message' => 'Cookie set']);
-}
+});
+?>
